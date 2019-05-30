@@ -113,7 +113,7 @@ namespace CodeGolf.Service
 
         private static SyntaxTree WrapInClass(string function)
         {
-            var members = ((CompilationUnitSyntax) CSharpSyntaxTree.ParseText(function).GetRoot()).Members;
+            var members = ParseCompilationUnit(function).Members;
             var methods = members.ToArray();
             var body = CSharpSyntaxTree.ParseText("using System;\n"
                    + "using System.Collections.Generic;\n"
