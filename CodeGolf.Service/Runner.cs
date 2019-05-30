@@ -10,7 +10,9 @@ using System.Threading.Tasks;
 using CodeGolf.Service.Dtos;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Optional;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace CodeGolf.Service
 {
@@ -111,14 +113,19 @@ namespace CodeGolf.Service
 
         private static SyntaxTree WrapInClass(string function)
         {
-            var transformed = string.Join("\n", function.Split('\n').Select(s => "    " + s));
-            return CSharpSyntaxTree.ParseText("using System;\n"
+            var members = ((CompilationUnitSyntax) CSharpSyntaxTree.ParseText(function).GetRoot()).Members;
+            var methods = members.ToArray();
+            var body = CSharpSyntaxTree.ParseText("using System;\n"
                    + "using System.Collections.Generic;\n"
                    + "using System.Linq;\n\n"
                    + $"public class {ClassName}\n"
                    + "{\n"
-                   + transformed
-                   + "\n}");
+                   + "\n}").GetRoot();
+
+            var rewriter = new FunctionInjector(methods);
+            var joined = rewriter.Visit(body).SyntaxTree;
+            var x = joined.GetRoot().NormalizeWhitespace().ToFullString();
+            return joined;
         }
 
         private static T UseTempFile<T>(Func<string> gen, Func<string, T> process)
