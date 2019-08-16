@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CodeGolf.ExecutionServer": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
