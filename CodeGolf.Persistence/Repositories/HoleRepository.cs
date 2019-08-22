@@ -1,6 +1,8 @@
 ﻿namespace CodeGolf.Persistence.Repositories
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using CodeGolf.Domain;
@@ -17,7 +19,7 @@
             this.context = context;
         }
 
-        async Task<Option<HoleInstance>> IHoleRepository.GetCurrentHole(CancellationToken cancellationToken)
+        async Task<Option<Hole>> IHoleRepository.GetCurrentHole(CancellationToken cancellationToken)
         {
             if (await this.context.Holes.AnyAsync(cancellationToken))
             {
@@ -25,18 +27,19 @@
             }
             else
             {
-                return Option.None<HoleInstance>();
+                return Option.None<Hole>();
             }
         }
 
         async Task IHoleRepository.EndHole(Guid holeId, DateTime closeTime)
         {
             var hole = await this.context.Holes.SingleAsync(a => a.HoleId == holeId);
-            this.context.Update(new HoleInstance(hole.HoleId, hole.Start, closeTime));
+            hole.SetEnd(closeTime);
+            this.context.Update(hole);
             await this.context.SaveChangesAsync();
         }
 
-        Task IHoleRepository.AddHole(HoleInstance hole)
+        Task IHoleRepository.AddHole(Hole hole)
         {
             this.context.Holes.Add(hole);
             return this.context.SaveChangesAsync();
@@ -46,6 +49,19 @@
         {
             this.context.Holes.RemoveRange(this.context.Holes);
             return this.context.SaveChangesAsync();
+        }
+
+        Task IHoleRepository.Update(Hole hole)
+        {
+            this.context.Attach(hole);
+            this.context.Entry(hole).State = EntityState.Modified;
+            this.context.Update(hole);
+            return this.context.SaveChangesAsync();
+        }
+
+        Task<IReadOnlyList<Hole>> IHoleRepository.GetGameHoles(Guid gameId)
+        {
+            return this.context.Holes.Where(a => a.GameId == gameId).ToReadOnlyAsync(CancellationToken.None);
         }
     }
 }

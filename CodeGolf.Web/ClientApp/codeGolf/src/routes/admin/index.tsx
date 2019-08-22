@@ -14,7 +14,7 @@ export default class Comp extends Component<{}, State> {
 
     constructor() {
         super();
-        this.state = { myGames: { type: "Loading" }, allChallenges: { type: "Loading" }, showCreate: false };
+        this.state = { myGames: { type: "Loading" }, allChallenges: { type: "Idle" }, showCreate: false };
     }
 
     public readonly componentDidMount = async () => {
@@ -24,6 +24,6 @@ export default class Comp extends Component<{}, State> {
     }
 
     public readonly render = (_: RenderableProps<{}>, state: Readonly<State>) =>
-        <FuncComp {...state} toggleCreate={(show: boolean) => this.setState(s => ({ ...s, showCreate: show }))} resetGame={resetGame} />
+        <FuncComp {...state} toggleCreate={(show: boolean) => this.setState(s => ({ ...s, showCreate: show }))} />
 
 }

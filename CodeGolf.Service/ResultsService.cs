@@ -15,21 +15,24 @@
     {
         private readonly IGameRepository gameRepository;
 
+        private readonly IHoleRepository holeRepository;
+
         private readonly IUserRepository userRepository;
 
         private readonly IBestAttemptsService bestAttemptsService;
 
-        public ResultsService(IGameRepository gameRepository, IUserRepository userRepository, IBestAttemptsService bestAttemptsService)
+        public ResultsService(IGameRepository gameRepository, IUserRepository userRepository, IBestAttemptsService bestAttemptsService, IHoleRepository holeRepository)
         {
             this.gameRepository = gameRepository;
             this.userRepository = userRepository;
             this.bestAttemptsService = bestAttemptsService;
+            this.holeRepository = holeRepository;
         }
 
-        async Task<IReadOnlyList<ResultDto>> IResultsService.GetFinalScores(CancellationToken cancellationToken)
+        async Task<IReadOnlyList<ResultDto>> IResultsService.GetFinalScores(Guid gameId, CancellationToken cancellationToken)
         {
             var holes = await Task.WhenAll(
-                            this.gameRepository.GetGame().Holes.Select(
+                            (await this.holeRepository.GetGameHoles(gameId)).Select(
                                 async h => (await this.bestAttemptsService.GetBestAttempts(h.HoleId, cancellationToken))
                                     .Select((a, b) => ValueTuple.Create(b, a))));
             var ranks = holes.SelectMany(a => a);

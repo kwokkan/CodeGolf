@@ -13,34 +13,48 @@
 
     public class GameRepository : IGameRepository
     {
-        private static readonly Game Game = new Game(
-            new[]
-                {
-                    new Hole(
-                        Guid.Parse("5ccbb74c-1972-47cd-9c5c-f2f512ad95e5"),
-                        Challenges.HelloWorld.Id,
-                        TimeSpan.FromMinutes(5),
-                        1),
-                    new Hole(
-                        Guid.Parse("d44ee76a-ccde-4006-aa83-86578296a886"),
-                        Challenges.AlienSpeak.Id,
-                        TimeSpan.FromMinutes(5),
-                        2),
-                });
+        private static readonly IReadOnlyList<Hole> Holes = new[]
+                                                                {
+                                                                    new Hole(
+                                                                        Guid.Parse(
+                                                                            "5ccbb74c-1972-47cd-9c5c-f2f512ad95e5"),
+                                                                        Challenges.HelloWorld.Id,
+                                                                        TimeSpan.FromMinutes(5),
+                                                                        1,
+                                                                        null,
+                                                                        null),
+                                                                    new Hole(
+                                                                        Guid.Parse(
+                                                                            "d44ee76a-ccde-4006-aa83-86578296a886"),
+                                                                        Challenges.AlienSpeak.Id,
+                                                                        TimeSpan.FromMinutes(5),
+                                                                        2,
+                                                                        null,
+                                                                        null),
+                                                                };
 
-        Game IGameRepository.GetGame()
+        private static readonly Game Game = new Game("test");
+
+        IReadOnlyList<Game> IGameRepository.GetMyGames(int userId)
+        {
+            return new[] { Game };
+        }
+
+        Game IGameRepository.GetGame(Guid gameId)
         {
             return Game;
         }
 
         Option<Hole> IGameRepository.GetByHoleId(Guid holeId)
         {
-            return Game.Holes.SingleOrNone(b => b.HoleId.Equals(holeId));
+            throw new NotImplementedException();
+            ////  return Game.Holes.SingleOrNone(b => b.HoleId.Equals(holeId));
         }
 
         Option<Hole> IGameRepository.GetAfter(Guid holeId)
         {
-            return GetAfter(Game.Holes, item => item.HoleId.Equals(holeId));
+            throw new NotImplementedException();
+            //// return GetAfter(Game.Holes, item => item.HoleId.Equals(holeId));
         }
 
         private static Option<T> GetAfter<T>(IReadOnlyList<T> list, Func<T, bool> equals) =>

@@ -1,5 +1,6 @@
 ﻿namespace CodeGolf.Service
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -8,6 +9,6 @@
 
     public interface IResultsService
     {
-        Task<IReadOnlyList<ResultDto>> GetFinalScores(CancellationToken cancellationToken);
+        Task<IReadOnlyList<ResultDto>> GetFinalScores(Guid gameId,  CancellationToken cancellationToken);
     }
 }

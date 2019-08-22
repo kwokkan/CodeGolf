@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using CodeGolf.Domain.ChallengeInterfaces;
@@ -10,9 +9,10 @@
     using CodeGolf.Service.Dtos;
     using CodeGolf.Web.Attributes;
     using CodeGolf.Web.Mappers;
-    using CodeGolf.Web.Models;
+    using CodeGolf.Web.Tooling;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Optional.Unsafe;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -22,15 +22,17 @@
     {
         private readonly IDashboardService dashboardService;
         private readonly IResultsService resultsService;
-        private readonly ChallengeSetMapper challengeSetMapper;
         private readonly IAdminService adminService;
+        private readonly ChallengeSetMapper challengeSetMapper;
+        private readonly IIdentityTools identityTools;
 
-        public AdminController(IDashboardService dashboardService, ChallengeSetMapper challengeSetMapper, IResultsService resultsService, IAdminService adminService)
+        public AdminController(IDashboardService dashboardService, ChallengeSetMapper challengeSetMapper, IResultsService resultsService, IIdentityTools identityTools, IAdminService adminService)
         {
             this.dashboardService = dashboardService;
             this.challengeSetMapper = challengeSetMapper;
             this.resultsService = resultsService;
             this.adminService = adminService;
+            this.identityTools = identityTools;
         }
 
         [HttpPost("[action]")]
@@ -43,9 +45,9 @@
         }
 
         [HttpPost("[action]")]
-        public Task NextHole(CancellationToken cancellationToken)
+        public Task NextHole(Guid gameId, CancellationToken cancellationToken)
         {
-            return this.dashboardService.NextHole(cancellationToken);
+            return this.dashboardService.NextHole(gameId, cancellationToken);
         }
 
         [HttpGet("[action]/{holeId}")]
@@ -63,9 +65,9 @@
         }
 
         [HttpGet("[action]")]
-        public async Task<ActionResult<IReadOnlyList<ResultDto>>> FinalScores(CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyList<ResultDto>>> FinalScores(Guid gameId, CancellationToken cancellationToken)
         {
-            var r = await this.resultsService.GetFinalScores(cancellationToken);
+            var r = await this.resultsService.GetFinalScores(gameId, cancellationToken);
             return new ActionResult<IReadOnlyList<ResultDto>>(r);
         }
 
@@ -81,16 +83,16 @@
         [HttpGet("[action]")]
         public async Task<ActionResult<IReadOnlyList<GameDto>>> MyGames(CancellationToken cancellationToken)
         {
-            // var user = this.identityTools.GetIdentity(this.HttpContext).ValueOrFailure();
-            var r = await this.adminService.GetAllHoles(cancellationToken);
-            return new ActionResult<IReadOnlyList<GameDto>>(
-                new[] { new GameDto(Guid.NewGuid(), "aa", r.Select(a => new RoundDto(a.Id, a.Title)).ToList()) });
+            var user = this.identityTools.GetIdentity(this.HttpContext).ValueOrFailure();
+            var r = await this.adminService.GetAllGames(user, cancellationToken);
+            return new ActionResult<IReadOnlyList<GameDto>>(r);
         }
 
-        [HttpPost("[action]/{gameId}")]
-        public Task Reset(CancellationToken cancellationToken)
+        [HttpPost("[action]")]
+        public Task CreateGame(GameDto challenges, string accessKey, CancellationToken cancellationToken)
         {
-            return this.adminService.ResetGame();
+            var user = this.identityTools.GetIdentity(this.HttpContext).ValueOrFailure();
+            return this.adminService.CreateGame(challenges, accessKey, user, cancellationToken);
         }
 
         [HttpGet("[action]")]

@@ -1,7 +1,7 @@
 import { FunctionalComponent, h } from "preact";
 import { Circular } from "styled-loaders";
 
-import { Game, Guid, ifLoaded, LoadingState, Round } from "../../types/types";
+import { Game, ifLoaded, LoadingState, Round } from "../../types/types";
 
 const Modal: FunctionalComponent<{ readonly hide: () => void, readonly challenges: ReadonlyArray<Round> }> = ({ hide }) =>
     (<div class="modal is-active">
@@ -35,9 +35,9 @@ const Row: FunctionalComponent<{ readonly g: Game, readonly resetGame: ((g: Guid
             <div class="message-content">
                 Rounds:
                 <ul>
-                    {g.rounds.map(b => <li key={b.id}>{b.name}</li>)}
+                    {a.rounds.map(b => <li key={b.challengeId}>{b.title}</li>)}
                 </ul>
-                <button class="button" onClick={() => resetGame(g.id)}>Reset Game</button>
+                <button class="button">Reset Game</button>
             </div>
         </div>
     </article>);
@@ -47,13 +47,12 @@ type Props = ({
     readonly allChallenges: LoadingState<ReadonlyArray<Round>>;
     readonly showCreate: boolean
     readonly toggleCreate: (state: boolean) => void;
-    readonly resetGame: ((g: Guid) => void);
 });
 
-const FuncComp: FunctionalComponent<Readonly<Props>> = ({ myGames, allChallenges, showCreate, toggleCreate, resetGame }) =>
+const FuncComp: FunctionalComponent<Readonly<Props>> = ({ myGames, allChallenges, showCreate, toggleCreate }) =>
     ifLoaded(myGames, g =>
         (<div><section class="accordions">
-            {g.map((a: Game) => <Row g={a} resetGame={resetGame} key={a.id} />)}
+            {g.map((a: Game) => <Row a={a} key={a.id} />)}
         </section>
             {ifLoaded(allChallenges, c => (showCreate ? <Modal hide={() => toggleCreate(false)} challenges={c} /> : null), () => null)}
             <button className="button" onClick={() => toggleCreate(!showCreate)}>Create New</button>

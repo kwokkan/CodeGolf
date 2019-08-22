@@ -62,7 +62,7 @@ namespace CodeGolf.Unit.Test.Services
             this.userRepository.Setup(a => a.GetByUserId(1, CancellationToken.None))
                 .Returns(Task.FromResult(Option.Some(new User(1, "matt", "matt mccorry", "avatar.png"))));
 
-            var scores = await this.dashboardService.GetFinalScores(CancellationToken.None);
+            var scores = await this.dashboardService.GetFinalScores(Guid.NewGuid(), CancellationToken.None);
 
             scores.Should().BeEquivalentTo(new ResultDto(1, "matt", "avatar.png", 6));
             this.mockRepository.VerifyAll();

@@ -4,14 +4,18 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    using CodeGolf.Domain;
     using CodeGolf.Domain.ChallengeInterfaces;
+    using CodeGolf.Service.Dtos;
 
     public interface IAdminService
     {
         Task ResetGame();
 
-        Task<IReadOnlyList<IChallengeSet>> GetAllHoles(CancellationToken cancellationToken);
+        Task<IReadOnlyList<GameDto>> GetAllGames(User user, CancellationToken cancellationToken);
 
-        Task<IReadOnlyList<IChallengeSet>> GetAllChallenges(in CancellationToken cancellationToken);
+        Task CreateGame(GameDto challenges, string accessKey, User user, CancellationToken cancellationToken);
+
+        Task<IReadOnlyList<IChallengeSet>> GetAllChallenges(CancellationToken cancellationToken);
     }
 }
