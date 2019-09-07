@@ -15,7 +15,7 @@ jobs:
             popd
 
   test:
-    working_directory: ~/CodeGolf.Web/ClientApp/codeGolf/
+    working_directory: ~/CodeGolf/CodeGolf.Web/ClientApp/codeGolf/
     docker:
       - image: circleci/node:8
     steps:
