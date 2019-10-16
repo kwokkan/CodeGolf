@@ -1,11 +1,6 @@
-import { Editor, TextMarker } from "codemirror";
+import { ControlledEditor } from "@monaco-editor/react";
 import { FunctionalComponent, h } from "preact";
-import { Controlled as CodeMirror, IControlledCodeMirror } from "react-codemirror2";
-
 import { RunResult } from "../../types/types";
-
-import "codemirror/lib/codemirror.css";
-import "codemirror/mode/clike/clike";
 
 interface Props {
     readonly code: string;
@@ -21,41 +16,17 @@ const getScore = (code: string) => code
     .replace(/\s/g, "")
     .length.toString();
 
-// tslint:disable-next-line: no-let
-let editor = undefined as (Editor | undefined);
-
-const setErrors = (editorComp: Editor, errors?: RunResult) => {
-    const doc = editorComp.getDoc();
-
-    doc.getAllMarks().map((a: TextMarker) => a.clear());
-    if (errors && errors.type === "CompileError" && errors.errors.length > 0) {
-        errors.errors.map(e => doc.markText({ line: e.line - 1, ch: e.col }, { line: e.line - 1, ch: e.endCol },
-            { className: "underline" }));
-    }
-};
-
-const CM = CodeMirror as unknown as FunctionalComponent<IControlledCodeMirror>;
-
-const Comp: FunctionalComponent<Readonly<Props>> = ({ code, codeChanged, submitCode, errors }) => {
-    if (editor) {
-        setErrors(editor, errors);
-    }
+const Comp: FunctionalComponent<Readonly<Props>> = ({ code, submitCode }) => {
     return (<div>
         <div class="field">
             <label class="label">Code</label>
             <div class="control">
-                <CM
+                <ControlledEditor
                     value={code}
                     className="editor"
-                    options={{ lineNumbers: true, mode: "text/x-csharp" }}
-                    editorDidMount={(e: Editor) => {
-                        editor = e;
-                        setTimeout(() => {
-                            e.refresh();
-                        }, 250);
-                    }}
-
-                    onBeforeChange={(_: unknown, __: unknown, s: string) => codeChanged(s)} />
+                    height="40vh"
+                    language="csharp"
+                />
             </div>
         </div>
         <div class="field">
